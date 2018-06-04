@@ -15,15 +15,21 @@ namespace DeliveryService.Controllers
         {
             try
             {
-                var pathFinder = new PathFinder(value.StartPoint, value.EndPoint, /*save money*/false);
+                var pathFinder = new PathFinder(value.StartPoint, value.EndPoint, /*save money*/value.PreferCheapestPath);
                 pathFinder.FindShortestPaths();
 
                 value.RoutePath = pathFinder.getDeliveryRoutePoints();
 
+                var deliveryRouteDistances = pathFinder.getEndPointDistances();
+
+                value.AverageTime = !value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
+                value.AverageCost = value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
+
                 return value;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("DeliveryRoute Exception: {0}", ex);
                 return null;
             }
             

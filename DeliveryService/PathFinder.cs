@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DeliveryService.Models;
 
@@ -13,8 +14,8 @@ namespace DeliveryService
 
         private readonly bool preferCheaperDelivery;
 
-        private readonly Point shippintStartPoint;
-        private readonly Point shippintEndPoint;
+        private readonly Point shippingStartPoint;
+        private readonly Point shippingEndPoint;
 
         private readonly List<Point> shippingPoints;
         private readonly List<Route> shippingRoutes;
@@ -30,6 +31,7 @@ namespace DeliveryService
         /// </summary>
         private Dictionary<Point, Point> pointPredecessors;
         private Dictionary<Point, float> pointDistances;
+        private Dictionary<Point, float> pointAlternativeDistances;
 
         public PathFinder(string startPointName, string endPointName, bool saveMoney = true)
         {
@@ -39,10 +41,10 @@ namespace DeliveryService
             shippingPoints = dbBridge.ReadPoints();
             shippingRoutes = dbBridge.ReadRoutes();
 
-            shippintStartPoint = shippingPoints.FirstOrDefault(pt => pt.Name == startPointName);
-            shippintEndPoint = shippingPoints.FirstOrDefault(pt => pt.Name == endPointName);
+            shippingStartPoint = shippingPoints.FirstOrDefault(pt => pt.Name == startPointName);
+            shippingEndPoint = shippingPoints.FirstOrDefault(pt => pt.Name == endPointName);
 
-            if (shippintStartPoint == null || shippintEndPoint == null)
+            if (shippingStartPoint == null || shippingEndPoint == null)
             {
                 throw new System.Exception("Invalid Path Endpoints");
             }
@@ -58,10 +60,12 @@ namespace DeliveryService
 
             pointPredecessors = new Dictionary<Point, Point>();
             pointDistances = new Dictionary<Point, float>();
+            pointAlternativeDistances = new Dictionary<Point, float>();
 
             // Set tentative distance of the initial point to 0 (zero). 
-            pointDistances.Add(shippintStartPoint, 0);
-            unvisitedPoints.Add(shippintStartPoint);
+            pointDistances.Add(shippingStartPoint, 0);
+            pointAlternativeDistances.Add(shippingStartPoint, 0);
+            unvisitedPoints.Add(shippingStartPoint);
 
             while (unvisitedPoints.Count() > 0)
             {
@@ -69,6 +73,7 @@ namespace DeliveryService
 
                 visitedPoints.Add(point);
                 unvisitedPoints.Remove(point);
+
                 findMinimalDistancesToNeighbors(point);
             }
         }
@@ -85,14 +90,19 @@ namespace DeliveryService
 
             foreach (var neighborPoint in neighborPoints)
             {
-                //distance to B through A 
+                // Distance to neighborPoint through basePoint. 
+                float distanceToNeighborThroughBasePoint = getPointShortestDistance(pointDistances, basePoint) + getDistanceBetweenPoints(basePoint, neighborPoint, preferCheaperDelivery);
 
-                float distanceToNeighborThroughBasePoint = getPointShortestDistance(basePoint) + getDistanceBetweenPoints(basePoint, neighborPoint);
-
-                if (distanceToNeighborThroughBasePoint < getPointShortestDistance(neighborPoint))
+                if (distanceToNeighborThroughBasePoint < getPointShortestDistance(pointDistances, neighborPoint))
                 {
-                    pointDistances.Add(neighborPoint, distanceToNeighborThroughBasePoint);
-                    pointPredecessors.Add(neighborPoint, basePoint);
+                    addOrUpdatePointDictionary(pointDistances, neighborPoint, distanceToNeighborThroughBasePoint);
+                    addOrUpdatePointDictionary(pointPredecessors, neighborPoint, basePoint);
+
+                    // Also save alternative distance.
+                    {
+                        float alternativeDistanceToNeighborThroughBasePoint = getPointShortestDistance(pointAlternativeDistances, basePoint) + getDistanceBetweenPoints(basePoint, neighborPoint, !preferCheaperDelivery);
+                        addOrUpdatePointDictionary(pointAlternativeDistances, neighborPoint, alternativeDistanceToNeighborThroughBasePoint);
+                    }
 
                     // Neighbor point is now ready to be visited.
                     unvisitedPoints.Add(neighborPoint);
@@ -100,7 +110,7 @@ namespace DeliveryService
             }
         }
 
-        private float getDistanceBetweenPoints(Point startPoint, Point endPoint)
+        private float getDistanceBetweenPoints(Point startPoint, Point endPoint, bool saveMoney)
         {
             float distanceBetweenPoints = 0.0f;
 
@@ -108,7 +118,7 @@ namespace DeliveryService
             {
                 if (route.StartPointID.Equals(startPoint.ID) && route.EndPointID.Equals(endPoint.ID))
                 {
-                    distanceBetweenPoints = preferCheaperDelivery ? route.Cost : route.Time;
+                    distanceBetweenPoints = saveMoney ? route.Cost : route.Time;
                     break;
                 }
             }
@@ -145,7 +155,7 @@ namespace DeliveryService
                 {
                     minDistancePoint = point;
                 }
-                else if (getPointShortestDistance(point) < getPointShortestDistance(minDistancePoint))
+                else if (getPointShortestDistance(pointDistances, point) < getPointShortestDistance(pointDistances, minDistancePoint))
                 {
                     minDistancePoint = point;
                 }
@@ -163,11 +173,11 @@ namespace DeliveryService
         /// </summary>
         /// <param name="point"></param>
         /// <returns>Point distance</returns>
-        private float getPointShortestDistance(Point point)
+        private float getPointShortestDistance(Dictionary<Point, float> pointDictionary, Point point)
         {
             float pointDistance = -1.0f;
 
-            if (pointDistances.TryGetValue(point, out pointDistance))
+            if (pointDictionary.TryGetValue(point, out pointDistance))
             {
                 return pointDistance;
             }
@@ -185,7 +195,7 @@ namespace DeliveryService
         public List<Point> getDeliveryRoutePoints()
         {
             var pointsPath = new List<Point>();
-            var pointToBackTrack = shippintEndPoint;
+            var pointToBackTrack = shippingEndPoint;
 
             bool pathExists = pointPredecessors.TryGetValue(pointToBackTrack, out Point pathValidationPoint);
             if (!pathExists)
@@ -204,6 +214,31 @@ namespace DeliveryService
             // Put path in the correct order.
             pointsPath.Reverse();
             return pointsPath;
+        }
+        
+        /// <summary>
+        /// Return the distances of the shipping endpoint.
+        /// </summary>
+        /// <returns>end distance and alternative end distance</returns>
+        public Tuple<float, float> getEndPointDistances()
+        {
+            pointDistances.TryGetValue(shippingEndPoint, out float endDistance);
+            pointAlternativeDistances.TryGetValue(shippingEndPoint, out float alternativeEndDistance);
+            return new Tuple<float, float>(endDistance, alternativeEndDistance);
+        }
+
+        private void addOrUpdatePointDictionary<T>(Dictionary<Point, T> pointDictionary, Point point, T newValue)
+        {
+            if (pointDictionary.TryGetValue(point, out T valueInDictionary))
+            {
+                // Value exists! Update.
+                pointDictionary[point] = newValue;
+            }
+            else
+            {
+                // Value doesn't exist! Add.
+                pointDictionary.Add(point, newValue);
+            }
         }
     }
 }

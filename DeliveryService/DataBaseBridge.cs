@@ -9,6 +9,9 @@ using System.Data;
 
 
 // TODO: Add a 3rd party logger
+// TODO: Only users with admin permission may create, update or delete new points or routes.
+// TODO: Add unit tests.
+
 
 namespace DeliveryService
 {
