@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using DeliveryService.Models;
-using MySql.Data;
-using System.Collections;
 using System.Data;
 
-
-// TODO: Add a 3rd party logger
-// TODO: Only users with admin permission may create, update or delete new points or routes.
-// TODO: Add unit tests.
-
+// TODO: Add unit tests for CRUD Points and Routes and Post tests for Delivery routes
+// TODO: Export database.
 
 namespace DeliveryService
 {
