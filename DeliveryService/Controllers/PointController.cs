@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Web.Http;
 using DeliveryService.Models;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace DeliveryService.Controllers

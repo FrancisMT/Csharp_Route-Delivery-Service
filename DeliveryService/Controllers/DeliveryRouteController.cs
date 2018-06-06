@@ -16,12 +16,12 @@ namespace DeliveryService.Controllers
             try
             {
                 var pathFinder = new PathFinder(value.StartPoint, value.EndPoint, /*save money*/value.PreferCheapestPath);
-                pathFinder.FindShortestPaths();
 
-                value.RoutePath = pathFinder.getDeliveryRoutePoints();
+                pathFinder.FindShortestPaths();
 
                 var deliveryRouteDistances = pathFinder.getEndPointDistances();
 
+                value.RoutePath = pathFinder.getDeliveryRoutePoints();
                 value.AverageTime = !value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
                 value.AverageCost = value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
 

@@ -8,6 +8,11 @@
             Name = null;
         }
 
+        public Point(string name)
+        {
+            Name = name;
+        }
+
         public Point(long id, string name)
         {
             ID = id;

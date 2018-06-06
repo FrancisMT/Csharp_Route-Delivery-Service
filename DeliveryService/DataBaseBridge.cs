@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using DeliveryService.Models;
 using System.Data;
+using System.Linq;
 
 // TODO: Add unit tests for CRUD Points and Routes and Post tests for Delivery routes
-// TODO: Export database.
 
 namespace DeliveryService
 {
@@ -89,7 +89,7 @@ namespace DeliveryService
             string readPointsSqlQuery = "SELECT * FROM points";
             var sqlReadPointsCommand = new MySql.Data.MySqlClient.MySqlCommand(readPointsSqlQuery, dbConnection);
 
-            var pointArray = new List<Point>();
+            var pointList = new List<Point>();
 
             using (var mySQLReader = sqlReadPointsCommand.ExecuteReader())
             {
@@ -100,10 +100,10 @@ namespace DeliveryService
                         ID = mySQLReader.GetInt32(0),
                         Name = mySQLReader.GetString(1),
                     };
-                    pointArray.Add(pointToGet);
+                    pointList.Add(pointToGet);
                 }
 
-                return pointArray;
+                return pointList;
             }
         }
 
@@ -177,8 +177,12 @@ namespace DeliveryService
 
         public bool CreateRoute(Route RouteToCreate)
         {
+            // Get routes from the database.
+            var routes = ReadRoutes();
+            var routeWithSameEndPoints = routes.FirstOrDefault(rt => rt.StartPointID == RouteToCreate.StartPointID && rt.EndPointID == RouteToCreate.EndPointID);
+
             bool
-             routeExists = ReadRoute(RouteToCreate.ID) != null,
+             routeExists = routeWithSameEndPoints != null,
              routeEligibleForCreation = checkRouteEligibility(RouteToCreate.StartPointID, RouteToCreate.EndPointID);
 
             // Only create Route if it doesn't exists and is eligible for creation.
@@ -235,7 +239,7 @@ namespace DeliveryService
             string readRoutesSqlQuery = "SELECT * FROM Routes";
             var sqlReadRoutesCommand = new MySql.Data.MySqlClient.MySqlCommand(readRoutesSqlQuery, dbConnection);
 
-            var RouteArray = new List<Route>();
+            var RouteList = new List<Route>();
 
             using (var mySQLReader = sqlReadRoutesCommand.ExecuteReader())
             {
@@ -249,10 +253,10 @@ namespace DeliveryService
                         StartPointID = mySQLReader.GetInt32(3),
                         EndPointID = mySQLReader.GetInt32(4),
                     };
-                    RouteArray.Add(RouteToGet);
+                    RouteList.Add(RouteToGet);
                 }
 
-                return RouteArray;
+                return RouteList;
             }
         }
 
@@ -261,7 +265,7 @@ namespace DeliveryService
             string readRoutesSqlQuery = "SELECT * FROM Routes WHERE START_POINT_ID='" + PointID + "' OR END_POINT_ID='" + PointID + "'";
             var sqlReadRoutesCommand = new MySql.Data.MySqlClient.MySqlCommand(readRoutesSqlQuery, dbConnection);
 
-            var RouteArray = new List<Route>();
+            var RouteList = new List<Route>();
 
             using (var mySQLReader = sqlReadRoutesCommand.ExecuteReader())
             {
@@ -275,10 +279,10 @@ namespace DeliveryService
                         StartPointID = mySQLReader.GetInt32(3),
                         EndPointID = mySQLReader.GetInt32(4),
                     };
-                    RouteArray.Add(RouteToGet);
+                    RouteList.Add(RouteToGet);
                 }
 
-                return RouteArray;
+                return RouteList;
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DeliveryService.Models;
+using System.Linq;
 
 namespace DeliveryService.Tests
 {
@@ -9,123 +11,133 @@ namespace DeliveryService.Tests
         [TestMethod]
         public void AddNewPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
-           
-            // Add new point
 
-            // Assert that it was created successfully
+            const string pointName = "AddedPoint";
+            Point pointToAdd = new Point
+            {
+                Name = pointName,
+            };
 
-            // Delete point from db
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
+            var pointWithSameName = points.FirstOrDefault(pt => pt.Name == pointName);
+
+            // Try to add new point.
+            bool pointCreated = dbBridge.CreatePoint(pointToAdd);
+
+            if (pointWithSameName == null)
+            {
+                // Point should be created successfully.
+                Assert.IsTrue(pointCreated);
+            }
+            else
+            {
+                // Point should already exists.
+                Assert.IsFalse(pointCreated);
+            }
+
         }
 
         [TestMethod]
-        public void AddSamePointTwice()
+        public void GetPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
 
-            // Add new point
+            const string pointName = "PointToGet";
+            Point pointToAdd = new Point
+            {
+                Name = pointName,
+            };
 
-            // Add same point again
+            // Try to add new point.
+            bool pointCreated = dbBridge.CreatePoint(pointToAdd);
 
-            // Assert that it was not created successfully
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
+            var pointWithSameName = points.FirstOrDefault(pt => pt.Name == pointName);
 
-            // Delete point from db
-        }
-
-        [TestMethod]
-        public void GetSinglePoint()
-        {
-            // 
-            var dbBridge = new DatabaseBridge();
-
-            // Add new point
-
-
-            // Get that same point
-
-            // Assert that point created is equal to point received
-
-            // Delete point from db
-        }
-
-        [TestMethod]
-        public void GetAllPoints()
-        {
-            // 
-            var dbBridge = new DatabaseBridge();
-
-            // Add new point
-            // Add new differente point
-            // Add new differente point
-
-            // Get all points
-
-            // Assert that created points are equal to received points 
-
-            // Delete points from db
+            // Assert that the point exists in the database,
+            // either if the point was added during the test or if it existed in the database prior to the test.
+            Assert.AreNotEqual(pointWithSameName, null);
         }
 
         [TestMethod]
         public void UpdateExistingPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
 
-            // Add new point
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
+            // Get point with highest ID
+            var pointWithMaxID = points.Max(pt => pt.ID);
 
-            // Get all points and find the one with same point name and get it's id.
+            Point pointToUpdate = new Point
+            {
+                Name = "UpdatedPointName",
+            };
 
-            // Update same Point
+            // Try to update point.
+            bool pointUpdated = dbBridge.UpdatePoint(pointWithMaxID, pointToUpdate);
 
-            // Assert that the point was updated
-
-            // Delete point from db
+            // Assert that the point was updated.
+            Assert.IsTrue(pointUpdated);
         }
 
         [TestMethod]
         public void UpdateNonExistingPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
 
-            // Get all points
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
             // Get point with highest ID
+            var pointWithMaxID = points.Max(pt => pt.ID);
 
-            // Update non existing point with pointID = ID + 1 (ensures that point doesn't exist)
+            Point pointToUpdate = new Point
+            {
+                Name = "UpdatedPointName",
+            };
+
+            // Try to update a point with non-existent ID.
+            bool pointUpdated = dbBridge.UpdatePoint(++pointWithMaxID, pointToUpdate);
 
             // Assert that point was not updated.
+            Assert.IsFalse(pointUpdated);
         }
 
         [TestMethod]
         public void DeleteExistingPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
 
-            // Add point
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
+            // Get point with highest ID
+            var pointWithMaxID = points.Max(pt => pt.ID);
 
-            // Get all points and find the one with same point name and get it's id.
+            // Try to delete point.
+            bool pointDeleted = dbBridge.DeletePoint(pointWithMaxID);
 
-            // Delete point with the id from the previous querry
-
-            // Assert that point was deleted.
+            // Assert that the point was updated.
+            Assert.IsTrue(pointDeleted);
         }
 
         [TestMethod]
         public void DeleteNonExistingPoint()
         {
-            // 
             var dbBridge = new DatabaseBridge();
 
-            // Add point
+            // Get points from the database.
+            var points = dbBridge.ReadPoints();
+            // Get point with highest ID
+            var pointWithMaxID = points.Max(pt => pt.ID);
 
-            // Get all points and find the one with the highest ID
+            // Try to delete a point with a non-existent ID.
+            bool pointDeleted = dbBridge.DeletePoint(++pointWithMaxID);
 
-            // Delete point with the id = ID + 1
-
-            // Assert that point was deleted because it doesn't exits.
+            // Assert that point was not deleted because it doesn't exits.
+            Assert.IsFalse(pointDeleted);
         }
 
     }
