@@ -6,11 +6,23 @@ namespace DeliveryService.Models
     {
         public DeliveryRoute()
         {
-            // The quickest path is chosen by default
+            // The quickest path is chosen by default.
             PreferCheapestPath = false;
 
             StartPoint = null;
             EndPoint = null;
+
+            RoutePath = null;
+            AverageTime = -1;
+            AverageCost = -1;
+        }
+        
+        public DeliveryRoute(bool saveMoney, string sourceName, string destinationName)
+        {
+            PreferCheapestPath = saveMoney;
+
+            StartPoint = sourceName;
+            EndPoint = destinationName;
 
             RoutePath = null;
             AverageTime = -1;

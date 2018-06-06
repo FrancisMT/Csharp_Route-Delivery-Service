@@ -1,7 +1,6 @@
-﻿using System;
-using DeliveryService.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using DeliveryService.Models;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DeliveryService.Tests
 {
@@ -13,7 +12,7 @@ namespace DeliveryService.Tests
         {
             var dbBridge = new DatabaseBridge();
 
-            // Add pointes
+            // Add points.
             {
                 var pointList = new List<Point>
                 {
@@ -35,7 +34,7 @@ namespace DeliveryService.Tests
 
             }
 
-            // Add routes
+            // Add routes.
             {
                 var routeList = new List<Route>
                 {
@@ -68,13 +67,15 @@ namespace DeliveryService.Tests
             var pathFinder = new PathFinder(deliveryRoute.StartPoint, deliveryRoute.EndPoint, deliveryRoute.PreferCheapestPath);
             pathFinder.FindShortestPaths();
 
-            var deliveryRouteDistances = pathFinder.getEndPointDistances();
+            var deliveryRouteDistances = pathFinder.GetEndPointDistances();
 
-            deliveryRoute.RoutePath = pathFinder.getDeliveryRoutePoints();
+            deliveryRoute.RoutePath = pathFinder.GetDeliveryRoutePoints();
             deliveryRoute.AverageCost = deliveryRouteDistances.Item1;
             deliveryRoute.AverageTime = deliveryRouteDistances.Item2;
 
-            Assert.IsTrue(deliveryRoute.AverageCost < deliveryRoute.AverageTime);
+            bool validResult = deliveryRoute.AverageCost == 2 && deliveryRoute.AverageTime == 40;
+
+            Assert.IsTrue(validResult);
         }
 
         [TestMethod]
@@ -82,7 +83,7 @@ namespace DeliveryService.Tests
         {
             var dbBridge = new DatabaseBridge();
 
-            // Add pointes
+            // Add points.
             {
                 var pointList = new List<Point>
                 {
@@ -104,7 +105,7 @@ namespace DeliveryService.Tests
 
             }
 
-            // Add routes
+            // Add routes.
             {
                 var routeList = new List<Route>
                 {
@@ -138,15 +139,15 @@ namespace DeliveryService.Tests
 
             pathFinder.FindShortestPaths();
 
-            var deliveryRouteDistances = pathFinder.getEndPointDistances();
+            var deliveryRouteDistances = pathFinder.GetEndPointDistances();
 
-            deliveryRoute.RoutePath = pathFinder.getDeliveryRoutePoints();
-            deliveryRoute.AverageCost = deliveryRouteDistances.Item1;
-            deliveryRoute.AverageTime = deliveryRouteDistances.Item2;
+            deliveryRoute.RoutePath = pathFinder.GetDeliveryRoutePoints();
+            deliveryRoute.AverageTime = deliveryRouteDistances.Item1;
+            deliveryRoute.AverageCost = deliveryRouteDistances.Item2;
 
-            Assert.IsTrue(deliveryRoute.AverageTime < deliveryRoute.AverageCost);
+            bool validResult = deliveryRoute.AverageCost == 5 && deliveryRoute.AverageTime == 30;
 
+            Assert.IsTrue(validResult);
         }
-
     }
 }

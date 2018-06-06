@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using DeliveryService.Models;
 using System.Data;
 using System.Linq;
-
-// TODO: Add unit tests for CRUD Points and Routes and Post tests for Delivery routes
+using System.Collections.Generic;
+using DeliveryService.Models;
 
 namespace DeliveryService
 {
@@ -34,7 +32,7 @@ namespace DeliveryService
         #region Points
         public bool CreatePoint(Point pointToCreate)
         {
-            // Only create point if it doesn't already exist
+            // Only create point if it doesn't already exist.
             if (ReadPoint(pointToCreate.ID) == null)
             {
                 string createPointSqlQuery = "INSERT INTO points (POINT_NAME) VALUES('" + pointToCreate.Name + "')";
@@ -260,7 +258,7 @@ namespace DeliveryService
             }
         }
 
-        private List<Route> ReadRoutesConnectedToPoint(long PointID)
+        private List<Route> readRoutesConnectedToPoint(long PointID)
         {
             string readRoutesSqlQuery = "SELECT * FROM Routes WHERE START_POINT_ID='" + PointID + "' OR END_POINT_ID='" + PointID + "'";
             var sqlReadRoutesCommand = new MySql.Data.MySqlClient.MySqlCommand(readRoutesSqlQuery, dbConnection);
@@ -342,7 +340,7 @@ namespace DeliveryService
 
         private void deleteRoutesConnectedToPoint(long PointID)
         {
-            var routesToDelete = ReadRoutesConnectedToPoint(PointID);
+            var routesToDelete = readRoutesConnectedToPoint(PointID);
 
             foreach (Route routeToDelete in routesToDelete)
             {
@@ -351,6 +349,5 @@ namespace DeliveryService
         }
 
         #endregion
-
     }
 }

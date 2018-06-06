@@ -29,8 +29,8 @@
         }
 
         public long ID { get; set; }
-        public float Cost { get; set; } // In €
-        public float Time { get; set; } // In Seconds
+        public float Cost { get; set; } // In €.
+        public float Time { get; set; } // In Seconds.
         public long StartPointID { get; set; }
         public long EndPointID { get; set; }
     }

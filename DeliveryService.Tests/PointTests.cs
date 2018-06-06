@@ -1,7 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
 using DeliveryService.Models;
-using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DeliveryService.Tests
 {
@@ -69,7 +68,7 @@ namespace DeliveryService.Tests
 
             // Get points from the database.
             var points = dbBridge.ReadPoints();
-            // Get point with highest ID
+            // Get point with highest ID.
             var pointWithMaxID = points.Max(pt => pt.ID);
 
             Point pointToUpdate = new Point
@@ -91,7 +90,7 @@ namespace DeliveryService.Tests
 
             // Get points from the database.
             var points = dbBridge.ReadPoints();
-            // Get point with highest ID
+            // Get point with highest ID.
             var pointWithMaxID = points.Max(pt => pt.ID);
 
             Point pointToUpdate = new Point
@@ -113,7 +112,7 @@ namespace DeliveryService.Tests
 
             // Get points from the database.
             var points = dbBridge.ReadPoints();
-            // Get point with highest ID
+            // Get point with highest ID.
             var pointWithMaxID = points.Max(pt => pt.ID);
 
             // Try to delete point.
@@ -130,7 +129,7 @@ namespace DeliveryService.Tests
 
             // Get points from the database.
             var points = dbBridge.ReadPoints();
-            // Get point with highest ID
+            // Get point with highest ID.
             var pointWithMaxID = points.Max(pt => pt.ID);
 
             // Try to delete a point with a non-existent ID.
@@ -139,6 +138,5 @@ namespace DeliveryService.Tests
             // Assert that point was not deleted because it doesn't exits.
             Assert.IsFalse(pointDeleted);
         }
-
     }
 }

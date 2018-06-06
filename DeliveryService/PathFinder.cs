@@ -11,7 +11,6 @@ namespace DeliveryService
     /// </summary>
     public class PathFinder
     {
-
         private readonly bool preferCheaperDelivery;
 
         private readonly Point shippingStartPoint;
@@ -27,10 +26,18 @@ namespace DeliveryService
         private HashSet<Point> unvisitedPoints;
 
         /// <summary>
-        /// Used as a resource to "backtrack" the path from the start to the end point.
+        /// Used as a resource to "backtrack" the path from the end point to the starting point.
         /// </summary>
         private Dictionary<Point, Point> pointPredecessors;
+
+        /// <summary>
+        /// Can be either time or cost.
+        /// </summary>
         private Dictionary<Point, float> pointDistances;
+
+        /// <summary>
+        /// Can be either time or cost.
+        /// </summary>
         private Dictionary<Point, float> pointAlternativeDistances;
 
         public PathFinder(string startPointName, string endPointName, bool saveMoney = true)
@@ -51,7 +58,7 @@ namespace DeliveryService
         }
 
         /// <summary>
-        /// Apply the Dijkstra's algorithm.
+        /// Apply Dijkstra's algorithm.
         /// </summary>
         public void FindShortestPaths()
         {
@@ -62,7 +69,7 @@ namespace DeliveryService
             pointDistances = new Dictionary<Point, float>();
             pointAlternativeDistances = new Dictionary<Point, float>();
 
-            // Set tentative distance of the initial point to 0 (zero). 
+            // Set tentative distances of the initial point to 0 (zero). 
             pointDistances.Add(shippingStartPoint, 0);
             pointAlternativeDistances.Add(shippingStartPoint, 0);
             unvisitedPoints.Add(shippingStartPoint);
@@ -79,10 +86,10 @@ namespace DeliveryService
         }
 
         /// <summary>
-        /// For the current point, consider all of its unvisited neighbors
-        /// and calculate their tentative distances through the current point.
-        /// Compare the newly calculated tentative distance to the current assigned value
-        /// and assign the smaller one.
+        /// For the current point, all of its unvisited neighbors are considered
+        /// and their tentative distances through the current point are calculated.
+        /// The newly calculated tentative distance are compared to the current assigned value
+        /// and the smaller one is assigned.
         /// </summary>
         private void findMinimalDistancesToNeighbors(Point basePoint)
         {
@@ -169,7 +176,7 @@ namespace DeliveryService
         }
 
         /// <summary>
-        /// All points have a tentative distance value: zero for the initial point and infinity for all other points.
+        /// All points have a tentative distance value equal to zero for the initial point and infinity for all other points.
         /// </summary>
         /// <param name="point"></param>
         /// <returns>Point distance</returns>
@@ -189,10 +196,10 @@ namespace DeliveryService
         }
 
         /// <summary>
-        /// Get the delivery route (path from the start to the end point of the delivery).
+        /// Get the delivery route (path from the starting point to the end point of the delivery).
         /// </summary>
         /// <returns>Delivery route point list  or null if no path exists.</returns>
-        public List<Point> getDeliveryRoutePoints()
+        public List<Point> GetDeliveryRoutePoints()
         {
             var pointsPath = new List<Point>();
             var pointToBackTrack = shippingEndPoint;
@@ -205,9 +212,8 @@ namespace DeliveryService
             }
 
             pointsPath.Add(pointToBackTrack);
-            while (pointPredecessors.TryGetValue(pointToBackTrack, out Point backtrackValidationPoint))
+            while (pointPredecessors.TryGetValue(pointToBackTrack, out pointToBackTrack))
             {
-                pointPredecessors.TryGetValue(pointToBackTrack, out pointToBackTrack);
                 pointsPath.Add(pointToBackTrack);
             }
 
@@ -220,7 +226,7 @@ namespace DeliveryService
         /// Return the distances of the shipping endpoint.
         /// </summary>
         /// <returns>end distance and alternative end distance</returns>
-        public Tuple<float, float> getEndPointDistances()
+        public Tuple<float, float> GetEndPointDistances()
         {
             pointDistances.TryGetValue(shippingEndPoint, out float endDistance);
             pointAlternativeDistances.TryGetValue(shippingEndPoint, out float alternativeEndDistance);

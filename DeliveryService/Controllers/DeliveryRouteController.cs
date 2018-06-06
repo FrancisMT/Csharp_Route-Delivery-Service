@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using DeliveryService.Models;
 
@@ -15,13 +11,13 @@ namespace DeliveryService.Controllers
         {
             try
             {
-                var pathFinder = new PathFinder(value.StartPoint, value.EndPoint, /*save money*/value.PreferCheapestPath);
+                var pathFinder = new PathFinder(value.StartPoint, value.EndPoint, value.PreferCheapestPath);
 
                 pathFinder.FindShortestPaths();
 
-                var deliveryRouteDistances = pathFinder.getEndPointDistances();
+                var deliveryRouteDistances = pathFinder.GetEndPointDistances();
 
-                value.RoutePath = pathFinder.getDeliveryRoutePoints();
+                value.RoutePath = pathFinder.GetDeliveryRoutePoints();
                 value.AverageTime = !value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
                 value.AverageCost = value.PreferCheapestPath ? deliveryRouteDistances.Item1 : deliveryRouteDistances.Item2;
 
